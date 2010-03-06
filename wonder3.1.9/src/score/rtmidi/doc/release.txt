@@ -1,0 +1,31 @@
+RtMidi - a set of C++ classes that provides a common API for realtime MIDI input/output across Linux (ALSA), SGI, Macintosh OS X (CoreMidi), and Windows (Multimedia) operating systems.
+
+By Gary P. Scavone, 2003-2006.
+
+v1.0.6: (9 March 2006)
+- bug fix for timestamp problem in ALSA  (thanks to Pedro Lopez-Cabanillas)
+
+v1.0.5: (18 November 2005)
+- added optional port name to openVirtualPort() functions
+- fixed UNICODE problem in Windows getting device names (thanks Eduardo Coutinho!).
+- fixed bug in Windows with respect to getting Sysex data (thanks Jean-Baptiste Berruchon!)
+
+v1.0.4: (14 October 2005)
+- added check for status byte == 0xF8 if ignoring timing messages
+- changed pthread attribute to SCHED_OTHER (from SCHED_RR) to avoid thread problem when realtime cababilities are not enabled.
+- now using ALSA sequencer time stamp information (thanks to Pedro Lopez-Cabanillas)
+- fixed memory leak in ALSA implementation
+- now concatenate segmented sysex messages in ALSA
+
+v1.0.3: (22 November 2004)
+- added common pure virtual functions to RtMidi abstract base class
+
+v1.0.2: (21 September 2004)
+- added warning messages to openVirtualPort() functions in Windows and Irix (where it can't be implemented)
+
+v1.0.1: (20 September 2004)
+- changed ALSA preprocessor definition to __LINUX_ALSASEQ__
+
+v1.0.0: (17 September 2004)
+- first release of new independent class with both input and output functionality
+

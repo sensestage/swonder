@@ -1,0 +1,166 @@
+<?xml version="1.0"?>
+<!DOCTYPE ladspa SYSTEM "ladspa-swh.dtd">
+<?xml-stylesheet href="ladspa.css" type="text/css"?>
+
+<ladspa>
+  <global>
+    <meta name="maker" value="swh, torbenh"/>
+    <meta name="copyright" value="GPL"/>
+    <meta name="properties" value="HARD_RT_CAPABLE"/>
+    <code><![CDATA[
+      #include <unistd.h>
+      #include <stdio.h>
+      #include <pthread.h>
+      #include <lo/lo.h>
+
+	      //#include "../src/constants.h"
+
+      #define OSC_PORT "58100"
+
+      #define EXITV -999
+      #define NUM_SOURCES 64
+
+      //#define DEBUG 1
+
+      static int scene = -1;
+      static float position_x[NUM_SOURCES];
+      static float position_y[NUM_SOURCES];
+      static float duration[NUM_SOURCES];
+      static int thread_created = 0;
+      static pthread_t thread;
+
+      static void *controller_thread(void *p)
+      {
+        int i;
+	int last_scene = -1;
+	float last_pos_x[NUM_SOURCES];
+	float last_pos_y[NUM_SOURCES];
+	char *addr_host = getenv( "TWONDER_HOST" );
+	char *addr_port = getenv( "TWONDER_PORT" );
+	lo_address address = lo_address_new( addr_host ? addr_host : "localhost", 
+					     addr_port ? addr_port : OSC_PORT);
+
+	for( i=0; i<NUM_SOURCES; i++ ) {
+		last_pos_x[i] = 0.0;
+		last_pos_y[i] = 0.0;
+		}
+	printf("THREAD\n");
+
+	while (scene != EXITV) {
+#ifdef DEBUG
+printf(". %d\n", scene);
+#endif
+      for( i=0; i<NUM_SOURCES; i++ ) {
+	if ((last_pos_x[i] != position_x[i]) || (last_pos_y[i] != position_y[i])) {
+	     last_pos_x[i] = position_x[i];
+	     last_pos_y[i] = position_y[i];
+	     //lo_send(address, "move", "iff", i, last_pos_x[i], last_pos_y[i]);
+
+	     //lo_send(address, "move", "iff", i, last_pos_x[i], last_pos_y[i]);
+	     //lo_send( address, "/WONDERINTERN/source/position", "ifffii", i, last_pos_x[i], last_pos_y[i], 2.0, 0, (int) (48000.0*duration[i])  );
+             //lo_send( address, "/WONDER/source/position", "ifffff", i, last_pos_x[i], last_pos_y[i], 2.0, 0.0, (duration[i])  );
+	     // adapt new cwonder api - no x-pos anymore
+             lo_send( address, "/WONDER/source/position", "iffff", i, last_pos_x[i], last_pos_y[i], 0.0, (duration[i])  );
+
+	    }
+	  }
+#ifdef DEBUG
+	  usleep(1000000);
+#else
+	  usleep(10000);
+#endif
+	}
+
+	lo_address_free(address);
+#ifdef DEBUG
+printf("DONE\n");
+#endif
+
+	return NULL;
+      }
+    ]]></code>
+  </global>
+
+  <plugin label="twonderController" id="1989" class="UtilityPlugin">
+	  <name>TWonder ControllerV2</name>
+
+    <callback event="instantiate"><![CDATA[
+	    int i;
+#ifdef DEBUG
+printf("instantiate called\n");
+#endif
+      scene = -1;
+      if (!thread_created) {
+	thread_created = 1;
+	pthread_create(&thread, NULL, controller_thread, NULL);
+      }
+	for( i=0; i<NUM_SOURCES; i++ ) {
+		position_x[i] = 0.0;
+		position_y[i] = 0.0;
+		duration[i] = 1.0;
+		}
+    ]]></callback>
+
+    <callback event="activate"><![CDATA[
+#ifdef DEBUG
+printf("activate called\n");
+#endif
+      scene = -1;
+    ]]></callback>
+
+    <callback event="run"><![CDATA[
+      unsigned long pos;
+      int src_number;
+
+      src_number = (int)(num_cont + 0.5f);
+      duration[src_number]=dura_cont;
+      
+      position_x[src_number] = x_cont;
+      position_y[src_number] = y_cont;
+
+      if (input != output) {
+        for (pos = 0; pos < sample_count; pos++) {
+          buffer_write(output[pos], input[pos]);
+        }
+      }
+    ]]></callback>
+
+    <callback event="cleanup"><![CDATA[
+#ifdef DEBUG
+printf("cleanup called\n");
+#endif
+//scene = EXITV;
+//      thread_created = 0;
+      //pthread_cancel(thread);
+    ]]></callback>
+
+    <port label="num_cont" dir="input" type="control" hint="default_0,integer">
+	    <name>Number of Source to control</name>
+	    <p>Sets the number of the source to control</p>
+      <range min="0" max="NUM_SOURCES"/>
+    </port>
+
+    <port label="x_cont" dir="input" type="control" hint="default_0">
+	    <name>XPosition</name>
+	    <p>X Position</p>
+	    <range min="-100" max="100"/>
+    </port>
+    <port label="y_cont" dir="input" type="control" hint="default_0">
+	    <name>YPosition</name>
+	    <p>Y Position</p>
+	    <range min="-100" max="100"/>
+    </port>
+    <port label="dura_cont" dir="input" type="control" hint="default_0">
+	    <name>Duration</name>
+	    <p>duraTion</p>
+	    <range min="0" max="20"/>
+    </port>
+    <port label="input" dir="input" type="audio">
+      <name>Input</name>
+    </port>
+
+    <port label="output" dir="output" type="audio">
+      <name>Output</name>
+    </port>
+  </plugin>
+</ladspa>

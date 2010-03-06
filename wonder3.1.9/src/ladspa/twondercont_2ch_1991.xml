@@ -1,0 +1,233 @@
+<?xml version="1.0"?>
+<!DOCTYPE ladspa SYSTEM "ladspa-swh.dtd">
+<?xml-stylesheet href="ladspa.css" type="text/css"?>
+
+<ladspa>
+  <global>
+    <meta name="maker" value="swh, torbenh"/>
+    <meta name="copyright" value="GPL"/>
+    <meta name="properties" value="HARD_RT_CAPABLE"/>
+    <code><![CDATA[
+      #include <unistd.h>
+      #include <stdio.h>
+      #include <pthread.h>
+      #include <lo/lo.h>
+
+	      //#include "../src/constants.h"
+
+      #define OSC_PORT "58100"
+
+      #define EXITV -999
+      #define NUM_SOURCES 64
+
+      //#define DEBUG 1
+
+      static int scene = -1;
+      static float position_x[NUM_SOURCES];
+      static float position_y[NUM_SOURCES];
+      static float duration[NUM_SOURCES];
+      static int thread_created = 0;
+      static pthread_t thread;
+
+      static void *controller_thread(void *p)
+      {
+        int i;
+	int last_scene = -1;
+	float last_pos_x[NUM_SOURCES];
+	float last_pos_y[NUM_SOURCES];
+	char *addr_host = getenv( "TWONDER_HOST" );
+	char *addr_port = getenv( "TWONDER_PORT" );
+	lo_address address = lo_address_new( addr_host ? addr_host : "localhost", 
+					     addr_port ? addr_port : OSC_PORT);
+
+	for( i=0; i<NUM_SOURCES; i++ ) {
+		last_pos_x[i] = 0.0;
+		last_pos_y[i] = 0.0;
+		}
+	printf("THREAD\n");
+
+	while (scene != EXITV) {
+#ifdef DEBUG
+printf(". %d\n", scene);
+#endif
+      for( i=0; i<NUM_SOURCES; i++ ) {
+	if ((last_pos_x[i] != position_x[i]) || (last_pos_y[i] != position_y[i])) {
+	     last_pos_x[i] = position_x[i];
+	     last_pos_y[i] = position_y[i];
+	     //lo_send(address, "move", "iff", i, last_pos_x[i], last_pos_y[i]);
+
+	     //lo_send(address, "move", "iff", i, last_pos_x[i], last_pos_y[i]);
+	     //lo_send( address, "/WONDERINTERN/source/position", "ifffii", i, last_pos_x[i], last_pos_y[i], 2.0, 0, (int) (48000.0*duration[i])  );
+	     //lo_send( address, "/WONDER/source/position", "ifffff", i, last_pos_x[i], last_pos_y[i], 2.0, 0.0, (duration[i])  );
+             //adapt new cwonder api - no x-pos anymore
+	     lo_send( address, "/WONDER/source/position", "iffff", i, last_pos_x[i], last_pos_y[i], 0.0, (duration[i])  );
+
+	    }
+	  }
+#ifdef DEBUG
+	  usleep(1000000);
+#else
+	  usleep(10000);
+#endif
+	}
+
+	lo_address_free(address);
+#ifdef DEBUG
+printf("DONE\n");
+#endif
+
+	return NULL;
+      }
+    ]]></code>
+  </global>
+
+  <plugin label="twonderController_2ch" id="1991" class="UtilityPlugin">
+	  <name>TWonder Controller 2channels</name>
+
+    <callback event="instantiate"><![CDATA[
+	    int i;
+#ifdef DEBUG
+printf("instantiate called\n");
+#endif
+      scene = -1;
+      if (!thread_created) {
+	thread_created = 1;
+	pthread_create(&thread, NULL, controller_thread, NULL);
+      }
+	for( i=0; i<NUM_SOURCES; i++ ) {
+		position_x[i] = 0.0;
+		position_y[i] = 0.0;
+		duration[i] = 1.0;
+		}
+    ]]></callback>
+
+    <callback event="activate"><![CDATA[
+#ifdef DEBUG
+printf("activate called\n");
+#endif
+      scene = -1;
+    ]]></callback>
+
+    <callback event="run"><![CDATA[
+      unsigned long pos;
+      float cos_rot;
+      float sin_rot;
+      int srcA_number = (int)(numA_cont + 0.5f);
+      int srcB_number = (int)(numB_cont + 0.5f);
+      duration[srcA_number]=dura_cont;
+      duration[srcB_number]=dura_cont;
+      
+      sin_rot = sinf(rot_cont * M_PI * 2 / 360 );
+      cos_rot = cosf(rot_cont * M_PI * 2 / 360 );
+
+      position_x[srcA_number] = x_cont + cos_rot * xA_cont * scale_x_cont + sin_rot * yA_cont * scale_y_cont;
+      position_y[srcA_number] = y_cont - sin_rot * xA_cont * scale_x_cont + cos_rot * yA_cont * scale_y_cont;
+
+      position_x[srcB_number] = x_cont + cos_rot * xB_cont * scale_x_cont + sin_rot * yB_cont * scale_y_cont;
+      position_y[srcB_number] = y_cont - sin_rot * xB_cont * scale_x_cont + cos_rot * yB_cont * scale_y_cont;
+
+
+      if (input != output) {
+        for (pos = 0; pos < sample_count; pos++) {
+          buffer_write(output[pos], input[pos]);
+        }
+      }
+    ]]></callback>
+
+    <callback event="cleanup"><![CDATA[
+#ifdef DEBUG
+printf("cleanup called\n");
+#endif
+//scene = EXITV;
+//    thread_created = 0;
+      //pthread_cancel(thread);
+    ]]></callback>
+
+    <port label="numA_cont" dir="input" type="control" hint="default_0,integer">
+	    <name>NumSource A</name>
+	    <p>Sets the number of the source A</p>
+      <range min="0" max="NUM_SOURCES"/>
+    </port>
+
+    <port label="numB_cont" dir="input" type="control" hint="default_0,integer">
+	    <name>NumSource B</name>
+	    <p>Sets the number of the source B</p>
+      <range min="0" max="NUM_SOURCES"/>
+    </port>
+
+    <port label="xA_cont" dir="input" type="control" hint="default_0">
+	    <name>A Offset X</name>
+	    <p>A Offset X</p>
+	    <range min="-5" max="5"/>
+    </port>
+ 
+    <port label="yA_cont" dir="input" type="control" hint="default_0">
+	    <name>A Offset Y</name>
+	    <p>A Offset Y</p>
+	    <range min="-5" max="5"/>
+    </port>
+ 
+    <port label="xB_cont" dir="input" type="control" hint="default_0">
+	    <name>B Offset X</name>
+	    <p>B Offset X</p>
+	    <range min="-5" max="5"/>
+    </port>
+ 
+    <port label="yB_cont" dir="input" type="control" hint="default_0">
+	    <name>B Offset Y</name>
+	    <p>B Offset Y</p>
+	    <range min="-5" max="5"/>
+    </port>
+    
+    <port label="x_cont" dir="input" type="control" hint="default_0">
+	    <name>Master XPosition</name>
+	    <p>Master X Position</p>
+	    <range min="-50" max="50"/>
+    </port>
+    <port label="y_cont" dir="input" type="control" hint="default_0">
+	    <name>Master YPosition</name>
+	    <p>Master Y Position</p>
+	    <range min="-50" max="50"/>
+    </port>
+
+    <port label="scale_x_cont" dir="input" type="control" hint="default_0">
+	    <name>Master XScale</name>
+	    <p>Master X Scale</p>
+	    <range min="0" max="10"/>
+    </port>
+    <port label="scale_y_cont" dir="input" type="control" hint="default_0">
+	    <name>Master YScale</name>
+	    <p>Master Y Scale</p>
+	    <range min="0" max="10"/>
+    </port>
+
+    <port label="rotcenter_x_cont" dir="input" type="control" hint="default_0">
+	    <name>Rotation Center X</name>
+	    <p>Rotation Center X</p>
+	    <range min="-5" max="5"/>
+    </port>
+    <port label="rotcenter_y_cont" dir="input" type="control" hint="default_0">
+	    <name>Rotation Center Y</name>
+	    <p>Rotation Center Y</p>
+	    <range min="-5" max="5"/>
+    </port>
+    <port label="rot_cont" dir="input" type="control" hint="default_0">
+	    <name>Master Rotation</name>
+	    <p>Master Rotation</p>
+	    <range min="-360" max="360"/>
+    </port>
+
+    <port label="dura_cont" dir="input" type="control" hint="default_0">
+	    <name>Duration</name>
+	    <p>duraTion</p>
+	    <range min="0" max="20"/>
+    </port>
+    <port label="input" dir="input" type="audio">
+	    <name>Input</name>
+    </port>
+
+    <port label="output" dir="output" type="audio">
+      <name>Output</name>
+    </port>
+  </plugin>
+</ladspa>

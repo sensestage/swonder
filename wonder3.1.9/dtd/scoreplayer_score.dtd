@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!--/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+     *                                                                                   *
+     *  WONDER - Wave field synthesis Of New Dimensions of Electronic music in Realtime  *
+     *  http://swonder.sourceforge.net                                                   *
+     *                                                                                   *
+     *                                                                                   *
+     *  Technische Universität Berlin, Germany                                           *
+     *  Audio Communication Group                                                        *
+     *  www.ak.tu-berlin.de                                                              *
+     *  Copyright 2006-2008                                                              *
+     *                                                                                   *
+     *                                                                                   *
+     *  This program is free software; you can redistribute it and/or modify             *
+     *  it under the terms of the GNU General Public License as published by             *
+     *  the Free Software Foundation; either version 2 of the License, or                *
+     *  (at your option) any later version.                                              *
+     *                                                                                   *
+     *  This program is distributed in the hope that it will be useful,                  *
+     *  but WITHOUT ANY WARRANTY; without even the implied warranty of                   *
+     *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                    *
+     *  GNU General Public License for more details.                                     *
+     *                                                                                   *
+     *  You should have received a copy of the GNU General Public License                *
+     *  along with this program; if not, write to the Free Software                      *
+     *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.       *
+     *                                                                                   *
+     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */ -->
+
+<!ELEMENT scorefile (orchestra,score+) >
+<!ATTLIST scorefile
+  path	  CDATA   #IMPLIED
+  date    CDATA   #IMPLIED
+>
+
+<!ELEMENT orchestra (src*) >
+
+<!ELEMENT src EMPTY>
+<!ATTLIST src
+  id      CDATA   #REQUIRED
+  type    CDATA   #REQUIRED
+  posx    CDATA   #REQUIRED
+  posy    CDATA   #REQUIRED
+  angle   CDATA   #REQUIRED
+>
+
+<!ELEMENT score (pos|type|angle|active|name|doppler)*>
+
+<!ELEMENT pos EMPTY>
+<!ATTLIST pos
+  id      CDATA   #REQUIRED
+  x       CDATA   #REQUIRED
+  y       CDATA   #REQUIRED
+  t	  CDATA   #REQUIRED
+  dur     CDATA   #REQUIRED
+>
+
+<!ELEMENT type EMPTY>
+<!ATTLIST type
+  id      CDATA   #REQUIRED
+  type    CDATA   #REQUIRED
+  t       CDATA   #REQUIRED
+>
+
+<!ELEMENT angle EMPTY>
+<!ATTLIST angle
+  id      CDATA   #REQUIRED
+  angle   CDATA   #REQUIRED
+  t	  CDATA   #REQUIRED
+  dur     CDATA   #REQUIRED
+>
+
+<!ELEMENT active EMPTY>
+<!ATTLIST active
+  id      CDATA   #REQUIRED
+  active  CDATA   #REQUIRED
+  t	  CDATA   #REQUIRED
+>
+
+<!ELEMENT name EMPTY>
+<!ATTLIST name
+  id      CDATA   #REQUIRED
+  name    CDATA   #REQUIRED
+  t	  CDATA   #REQUIRED
+>
+
+<!ELEMENT doppler EMPTY>
+<!ATTLIST doppler
+  id      CDATA   #REQUIRED
+  doppler CDATA   #REQUIRED
+  t	  CDATA   #REQUIRED
+>

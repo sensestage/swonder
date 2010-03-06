@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!--/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+     *                                                                                   *
+     *  WONDER - Wave field synthesis Of New Dimensions of Electronic music in Realtime  *
+     *  http://swonder.sourceforge.net                                                   *
+     *                                                                                   *
+     *                                                                                   *
+     *  Technische Universität Berlin, Germany                                           *
+     *  Audio Communication Group                                                        *
+     *  www.ak.tu-berlin.de                                                              *
+     *  Copyright 2006-2008                                                              *
+     *                                                                                   *
+     *                                                                                   *
+     *  This program is free software; you can redistribute it and/or modify             *
+     *  it under the terms of the GNU General Public License as published by             *
+     *  the Free Software Foundation; either version 2 of the License, or                *
+     *  (at your option) any later version.                                              *
+     *                                                                                   *
+     *  This program is distributed in the hope that it will be useful,                  *
+     *  but WITHOUT ANY WARRANTY; without even the implied warranty of                   *
+     *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                    *
+     *  GNU General Public License for more details.                                     *
+     *                                                                                   *
+     *  You should have received a copy of the GNU General Public License                *
+     *  along with this program; if not, write to the Free Software                      *
+     *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.       *
+     *                                                                                   *
+     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */ -->
+
+<!ELEMENT fwonder_config (jack,brir,impulseresponse,tail?,static_ir_matrix?,dynamic_ir_matrix?,advanced_settings?) >
+
+
+
+<!ELEMENT jack EMPTY>
+<!ATTLIST jack
+  name                  CDATA  #REQUIRED
+  number_of_sources     CDATA  #REQUIRED
+  number_of_outputs     CDATA  #REQUIRED
+>
+
+
+
+<!ELEMENT brir (azimuth, elevation)>
+<!ATTLIST brir
+  path    CDATA  #REQUIRED
+>
+
+<!ELEMENT azimuth EMPTY>
+<!ATTLIST azimuth
+  start       CDATA  #REQUIRED
+  stop        CDATA  #REQUIRED
+>
+
+<!ELEMENT elevation EMPTY>
+<!ATTLIST elevation
+  start       CDATA  #REQUIRED
+  stop        CDATA  #REQUIRED
+>
+
+
+
+<!ELEMENT impulseresponse EMPTY>
+<!ATTLIST impulseresponse
+  do_crossfades    (1|0)  #REQUIRED
+  max_length       CDATA  #REQUIRED
+>
+
+
+
+<!ELEMENT tail EMPTY>
+<!ATTLIST tail
+  name             CDATA               #REQUIRED
+  max_length       CDATA               #REQUIRED
+  partition_size   CDATA               #REQUIRED
+  window           (LINEAR|COS2|NOWIN) #REQUIRED
+  do_crossfades    (1|0)               #REQUIRED
+  offset           CDATA               #REQUIRED
+>
+
+
+
+<!ELEMENT static_ir_matrix EMPTY>
+<!ATTLIST static_ir_matrix
+  x_resolution  CDATA  #REQUIRED
+  y_resolution  CDATA  #REQUIRED
+>
+
+
+
+<!ELEMENT dynamic_ir_matrix EMPTY>
+<!ATTLIST dynamic_ir_matrix
+  x_resolution          CDATA  #REQUIRED
+  y_resolution          CDATA  #REQUIRED
+  x_radius              CDATA  #REQUIRED
+  y_radius              CDATA  #REQUIRED
+>
+
+
+
+<!ELEMENT advanced_settings EMPTY>
+<!ATTLIST advanced_settings
+  resolution_changeable (1|0) #REQUIRED
+>

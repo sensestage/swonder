@@ -1,0 +1,19 @@
+#!/bin/bash
+
+
+USERSEL=`zenity --list --title "sWonder Control" --text "Restart sWonder" --column "name" Start Stop`
+
+if [ "$USERSEL" == "Start" ]; then
+	./start-local.sh | zenity --progress --auto-close
+	zenity --info --title "Ready" --text "Started"
+fi
+
+if [ "$USERSEL" == "Stop" ]; then
+	killall cwonder3
+	killall twonder3
+	killall scoreplayer3
+	killall xwonder3
+	killall jfwonder3
+	zenity --info --title "Ready" --text "Stopped"
+fi
+

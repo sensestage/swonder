@@ -1,0 +1,148 @@
+#! /bin/sh
+
+#/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+# *                                                                                   *
+# *  WONDER - Wave field synthesis Of New Dimensions of Electronic music in Realtime  *
+# *  http://swonder.sourceforge.net                                                   *
+# *                                                                                   *
+# *                                                                                   *
+# *  Technische Universität Berlin, Germany                                           *
+# *  Audio Communication Group                                                        *
+# *  www.ak.tu-berlin.de                                                              *
+# *  Copyright 2006-2008                                                              *
+# *                                                                                   *
+# *                                                                                   *
+# *  This program is free software; you can redistribute it and/or modify             *
+# *  it under the terms of the GNU General Public License as published by             *
+# *  the Free Software Foundation; either version 2 of the License, or                *
+# *  (at your option) any later version.                                              *
+# *                                                                                   *
+# *  This program is distributed in the hope that it will be useful,                  *
+# *  but WITHOUT ANY WARRANTY; without even the implied warranty of                   *
+# *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                    *
+# *  GNU General Public License for more details.                                     *
+# *                                                                                   *
+# *  You should have received a copy of the GNU General Public License                *
+# *  along with this program; if not, write to the Free Software                      *
+# *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.       *
+# *                                                                                   *
+# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+DESC="the jfwonder program"
+NAME=jfwonder3
+NAMED=$NAME-daemon
+SCRIPTNAME=/etc/init.d/$NAMED
+
+# Define LSB log_* functions.
+# Depend on lsb-base (>= 3.0-6) to ensure that this file is present.
+. /lib/lsb/init-functions
+
+
+# Source config file; edit that file to configure this script.
+USER=""
+BINPATH=""
+
+if [ -e /etc/default/jfwonder-daemon ]; then
+  . /etc/default/jfwonder-daemon
+fi
+
+test "$USER" != "" || exit 0
+test "$BINPATH" != "" || exit 0
+
+DAEMON=$BINPATH/$NAME
+
+# Exit if the package is not installed
+[ -x "$DAEMON" ] || exit 0
+
+DAEMON_ARGS="-d -v -u $USER"
+
+PIDFILE=/tmp/wonder/jfwonder.$USER.pid
+
+
+do_start()
+{	
+	start-stop-daemon --start --quiet --pidfile $PIDFILE -c $USER --exec $DAEMON --test > /dev/null 
+	start-stop-daemon --start --quiet --pidfile $PIDFILE -c $USER --exec $DAEMON -- $DAEMON_ARGS > /dev/null
+	ret="$?"
+
+	[ "$VERBOSE" != no ] && log_daemon_msg "   Starting $NAME"	
+	case "$ret" in	    
+	    0) [ "$VERBOSE" != no ] && log_success_msg " daemon has been started." ;; 
+	    1) [ "$VERBOSE" != no ] && log_success_msg " daemon was already running." ;; 
+	    2) [ "$VERBOSE" != no ] && log_failure_msg " daemon could not be started." ;; 
+	esac
+}
+
+
+do_stop()
+{ 
+	start-stop-daemon --stop --quiet --retry=TERM/30/KILL/5 --pidfile $PIDFILE --name $NAME
+	ret="$?"
+
+	[ "$VERBOSE" != no ] && log_daemon_msg "   Stopping $NAME"	
+	case "$ret" in
+	    0) log_success_msg " daemon has been stopped." ;;
+	    1) log_success_msg " daemon was already stopped." ;;
+	    2) log_failure_msg " daemon could not be stopped." ;; 
+	esac	
+}
+
+#
+# Function that sends a SIGHUP to the daemon/service
+#
+do_reload()
+{
+	#
+	# If the daemon can reload its configuration without
+	# restarting (for example, when it is sent a SIGHUP),
+	# then implement that here.
+	#
+	start-stop-daemon --stop --signal 1 --quiet --pidfile $PIDFILE --name $NAME
+	return 0
+}
+
+case "$1" in
+  start)
+	do_start	
+	;;
+  stop)
+	do_stop	
+	;;
+  restart|force-reload)
+	log_daemon_msg "   Restarting $DESC" "$NAME "
+	do_stop
+	case "$?" in
+	  0|1)
+		do_start
+		case "$?" in
+			0) log_end_msg 0 ;;
+			1) log_end_msg 1 ;; # Old process is still running
+			*) log_end_msg 1 ;; # Failed to start
+		esac
+		;;
+	  *)
+	  	# Failed to stop
+		log_end_msg 1
+		;;
+	esac
+	;;
+
+    status)
+	pidofproc -p $PIDFILE $DAEMON >/dev/null
+	status=$?
+	[ "$VERBOSE" != no ] && log_daemon_msg "   Status $NAME"	
+	if [ $status -eq 0 ]; then
+	    log_success_msg " is running."
+	else
+	    log_failure_msg " is not running."
+	fi
+
+	exit 0
+	;;
+  *)
+	echo "Usage: $NAMED {start|stop|status|restart|force-reload}"
+	exit 3
+	;;
+esac
+
+exit 0

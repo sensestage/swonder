@@ -1,0 +1,41 @@
+# wonder startup
+
+- launch JackPilot,
+- select the right audio card or aggregate device as backend, in the Preferences.
+(e.g. Echo36channel is an aggregate device consisting of the three echo audiofire12's.)
+- Start jack.
+
+
+# CD to whatever directory has your config file, e.g.,
+cd /Users/matt/Work/WFS/wonder
+
+# startup the core control 
+cwonder3 -d -c cwonder_config_create.xml
+
+jfwonder3 -d
+
+# twonder doesn't seem to like running as a daemon
+#twonder3 -d -c twonder_config_create.xml -s twonder_speakerarray_create.xml
+twonder3 -d -c twonder_config_create.xml -s twonder_speakerarray_create.xml
+
+# check for errors:
+tail /var/log/syslog
+
+# or maybe this:
+tail /var/log/system.log
+
+# is wonder running?
+ps -A | grep wonder
+
+
+
+
+
+## TO QUIT:
+
+ps -A | grep wonder
+# now manually kill cwonder, jfwonder, and twonder by process ID
+# xwonder will quit automatically
+# quit whatever app is generating your sound sources (e.g., iTunes)
+# stop Jack
+# quit JackPilot

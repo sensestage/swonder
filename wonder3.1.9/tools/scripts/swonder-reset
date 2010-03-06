@@ -1,0 +1,39 @@
+#!/bin/bash
+
+
+USERSEL=`zenity --list --title "sWonder Mode" --text "Restart sWonder and set Mode" --column "name" Default Stable-Live Stable-NoLive Unstable-Live Unstable-NoLive`
+
+if [ "$USERSEL" == "Default" ]; then
+	cd /home/clusteradmin/scripts/
+	./set-mode.sh
+	./reset.sh | zenity --progress --auto-close
+	zenity --info --title "Ready" --text "Have Fun with the Default Setup"
+fi
+
+if [ "$USERSEL" == "Stable-Live" ]; then
+	cd /home/wclusteradmin/scripts/
+	./set-mode.sh stable live
+	./reset.sh | zenity --progress --auto-close
+	zenity --info --title "Ready" --text "Have Fun with the Stable Live Setup"
+fi
+
+if [ "$USERSEL" == "Stable-NoLive" ]; then
+	cd /home/clusteradmin/scripts/
+	./set-mode.sh stable nolive
+	./reset.sh | zenity --progress --auto-close
+	zenity --info --title "Ready" --text "Have Fun with the Stable NoLive Setup"
+fi
+
+if [ "$USERSEL" == "Unstable-Live" ]; then
+	cd /home/clusteradmin/scripts/
+	./set-mode.sh unstable live
+	./reset.sh | zenity --progress --auto-close
+	zenity --info --title "Ready" --text "Have Fun with the Unstable Live Setup"
+fi
+
+if [ "$USERSEL" == "Unstable-NoLive" ]; then
+	cd /home/clusteradmin/scripts/
+	./set-mode.sh unstable nolive
+	./reset.sh | zenity --progress --auto-close
+	zenity --info --title "Ready" --text "Have Fun with the Unstable NoLive Setup"
+fi
