@@ -442,8 +442,8 @@ void XwonderMainWindow::sendOSCSourcePosition( const Source& source )
     SourceCoordinates coord = source.getCoordinatesRounded().mapGLCoordToWonderCoord();
 
     if( ! xwConf->runWithoutCwonder )
-        lo_send( xwConf->cwonderAddr, "/WONDER/source/position", "iff",
-                 source.getID(), coord.x, coord.y );
+        lo_send( xwConf->cwonderAddr, "/WONDER/source/position", "ifff",
+                 source.getID(), coord.x, coord.y, 0.005 );
 
     if( ! wasModified )
         setModified();
@@ -455,8 +455,8 @@ void XwonderMainWindow::sendOSCSourceOrientation( const Source& source )
     SourceCoordinates coord = source.getCoordinatesRounded().mapGLCoordToWonderCoord();
 
     if( ! xwConf->runWithoutCwonder )
-        lo_send( xwConf->cwonderAddr, "/WONDER/source/angle", "if",
-                 source.getID(), coord.orientation );
+        lo_send( xwConf->cwonderAddr, "/WONDER/source/angle", "iff",
+                 source.getID(), coord.orientation, 0.005 );
     
     if( ! wasModified )
         setModified();
