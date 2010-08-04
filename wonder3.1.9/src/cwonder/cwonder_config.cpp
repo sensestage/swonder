@@ -4,7 +4,7 @@
  *  http://swonder.sourceforge.net                                                   *
  *                                                                                   *
  *                                                                                   *
- *  Technische Universität Berlin, Germany                                           *
+ *  Technische Universitï¿½t Berlin, Germany                                           *
  *  Audio Communication Group                                                        *
  *  www.ak.tu-berlin.de                                                              *
  *  Copyright 2006-2008                                                              *
@@ -38,6 +38,8 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <iostream>
+
 using namespace std;
 
 
@@ -55,6 +57,8 @@ CwonderConfig::CwonderConfig( int argc, char** argv )
     listeningPort = "58100";
     projectPath   = "";
     roomName      = "";
+
+    elevationY1 =     elevationZ1 =     elevationY2 =     elevationZ2 = 0.0;
 
     parseArgs( argc, argv );
 }
@@ -280,8 +284,28 @@ void CwonderConfig::getRenderPolygon( xmlpp::Node* node )
             point.set( x, y, z );
             renderPolygonPoints.push_back( point );
         }                   
+
+        xmlpp::NodeSet elevation = node->find( "/cwonder_config/renderpolygon/elevation" );
+
+        // iterate over all points and add them to vector roomPoints
+        pointIt = elevation.begin();
+
+        const xmlpp::Element* pointElement = dynamic_cast< const xmlpp::Element* >( *pointIt );  
+
+	std::cout << pointElement;
+	
+	istringstream sy1( pointElement->get_attribute( "y1" )->get_value() );
+        sy1 >> elevationY1;
+	istringstream sz1( pointElement->get_attribute( "z1" )->get_value() );
+        sz1 >> elevationZ1;
+	istringstream sy2( pointElement->get_attribute( "y2" )->get_value() );
+        sy2 >> elevationY2;
+	istringstream sz2( pointElement->get_attribute( "z2" )->get_value() );
+        sz2 >> elevationZ2;
+
     }
 }
+
 
 CwonderConfig* cwonderConf = NULL;
 WonderLog*     wonderlog   = NULL;

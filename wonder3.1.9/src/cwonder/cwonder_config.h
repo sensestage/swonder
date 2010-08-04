@@ -4,7 +4,7 @@
  *  http://swonder.sourceforge.net                                                   *
  *                                                                                   *
  *                                                                                   *
- *  Technische Universität Berlin, Germany                                           *
+ *  Technische Universitï¿½t Berlin, Germany                                           *
  *  Audio Communication Group                                                        *
  *  www.ak.tu-berlin.de                                                              *
  *  Copyright 2006-2008                                                              *
@@ -67,6 +67,7 @@ public:
 
     std::string roomName;
     std::vector< Vector3D > renderPolygonPoints;
+    float elevationY1, elevationY2, elevationZ1, elevationZ2;
 
 private:
     void parseArgs( int argc, char** argv );

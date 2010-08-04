@@ -1821,6 +1821,21 @@ int Cwonder::renderStreamConnect( string host, string port, string name )
     lo_send_message( newClientAddress, "/WONDER/global/renderpolygon", renderPolygonMessage );
     lo_message_free( renderPolygonMessage );
 
+    // send elevation information; this is still a crude hack, but works
+    lo_message elevationMessage = lo_message_new();
+
+///std::cout << cwonderConf->elevationY1 << ", " << cwonderConf->elevationZ1 << ", " << cwonderConf->elevationY2 << ", " << cwonderConf->elevationZ2 << std::endl;  
+
+    lo_message_add_string( elevationMessage, cwonderConf->roomName.c_str() );
+//     lo_message_add_int32(  elevationMessage, cwonderConf->renderPolygonPoints.size() );
+    lo_message_add_float(  elevationMessage, cwonderConf->elevationY1 );
+    lo_message_add_float(  elevationMessage, cwonderConf->elevationZ1 );
+    lo_message_add_float(  elevationMessage, cwonderConf->elevationY2 );
+    lo_message_add_float(  elevationMessage, cwonderConf->elevationZ2 );
+
+    lo_send_message( newClientAddress, "/WONDER/global/elevation", elevationMessage );
+    lo_message_free( elevationMessage );
+
     // if in basic mode activate all sources for rendering and let them use their default values
     if( cwonderConf->basicMode )
     {
