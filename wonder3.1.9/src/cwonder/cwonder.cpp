@@ -1999,6 +1999,36 @@ int Cwonder::visualStreamConnect( string host, string port, string name )
     for( streamIter = timerStream->begin(); streamIter != timerStream->end(); ++streamIter )
         sendStreamClientDataTo( newClientAddress, *streamIter );
 
+    // if in basic mode activate all sources for rendering and let them use their default values
+    if( cwonderConf->basicMode )
+    {
+        for( int i = 0 ; i < cwonderConf->maxNoSources; i++ )
+            lo_send( newClientAddress, "/WONDER/source/activate", "i", i );
+    }
+    else
+    {
+        // send the current status of the sources (even though the host is (still) on the list)
+        // but only if a scenario is there (i.e. project loaded/created)
+        if( scenario )
+        {
+            for( int i = 0 ; i < ( int ) scenario->sourcesVector.size(); ++i )
+            {               
+                Source* source = &( scenario->sourcesVector[ i ] );
+
+                if( source->active )
+                {
+                    lo_send( newClientAddress, "/WONDER/source/activate",      "i",   i );
+                    lo_send( newClientAddress, "/WONDER/source/type",          "ii",  i, source->type );
+                    lo_send( newClientAddress, "/WONDER/source/angle",         "if",  i, source->angle );
+                    lo_send( newClientAddress, "/WONDER/source/position",      "iff", i, source->pos[ 0 ], source->pos[ 1 ] );
+                    lo_send( newClientAddress, "/WONDER/source/dopplerEffect", "ii",  i, ( int ) source->dopplerEffect );
+                }
+                else
+                    lo_send( newClientAddress, "/WONDER/source/deactivate", "i", i );
+            }
+        }
+    }
+
     if ( ret == 1 )         
         returnString = "reconnected";
     else    
