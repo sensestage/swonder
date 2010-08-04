@@ -37,7 +37,7 @@
     maxNoSources   CDATA  #REQUIRED	
 >
 
-<!ELEMENT renderpolygon (point*) >
+<!ELEMENT renderpolygon (point*,elevation) >
 <!ATTLIST renderpolygon
     roomname    CDATA  #REQUIRED	
 >
@@ -47,5 +47,13 @@
     x	CDATA  #REQUIRED	
     y	CDATA  #REQUIRED	
     z	CDATA  #REQUIRED	
+>
+
+<!ELEMENT elevation EMPTY>
+<!ATTLIST elevation
+    y1	CDATA  #REQUIRED	
+    z1	CDATA  #REQUIRED	
+    y2	CDATA  #REQUIRED	
+    z2	CDATA  #REQUIRED	
 >
 
