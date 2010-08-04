@@ -478,7 +478,7 @@ int oscSrcPositionHandler( handlerArgs )
 
     MoveCommand* moveCmd = new MoveCommand( newPos, 
                                             sourceId,
-                                            TimeStamp( ( wonder_frames_t ) ( time * ( float ) twonderConf->sampleRate ) ),
+                                            TimeStamp( time ), // conversion to sampletime happens in TimeStamp( float );
                                             ( int ) ( duration * twonderConf->sampleRate ) );
     realtimeCommandEngine->put( moveCmd );
 
@@ -529,7 +529,9 @@ int oscSrcAngleHandler( handlerArgs )
     return 0;
 }
 
-
+/**
+ * @brief Is a QCommand to change a sources type to another.
+ */
 int oscSrcTypeHandler( handlerArgs )
 {
     if( argv[ 0 ]->i >= twonderConf->noSources  ||  argv[ 0 ]->i < 0  || argv[ 1 ]->i < 0 || argv[ 1 ]->i > 1 )
@@ -557,7 +559,7 @@ int oscSrcTypeHandler( handlerArgs )
                   << std::endl;
     }
 
-    TypeChangeCommand* typeCmd = new TypeChangeCommand( sourceId, newType, time );
+    TypeChangeCommand* typeCmd = new TypeChangeCommand( sourceId, newType, TimeStamp( time ) );
 	/// NOTE: here the time is handled again differently??
     realtimeCommandEngine->put( typeCmd );
 
@@ -587,7 +589,7 @@ int oscSrcDopplerHandler( handlerArgs )
                   << std::endl;
     }
 
-    DopplerChangeCommand* dopplerCmd = new DopplerChangeCommand( sourceId, useDoppler, time );
+    DopplerChangeCommand* dopplerCmd = new DopplerChangeCommand( sourceId, useDoppler, TimeStamp( time ) );
 	/// NOTE: time is handled again as with the type change
     realtimeCommandEngine->put( dopplerCmd );
 
@@ -667,9 +669,6 @@ int oscNoSourcesHandler( handlerArgs )
 int oscRenderPolygonHandler( handlerArgs )
 {
     // parse incoming points
-/**
- * @brief Is a QCommand to change a sources type to another.
- */
 
     // argv[ 0 ] is the roomname, drop it, we don't need that
     // get number of points 

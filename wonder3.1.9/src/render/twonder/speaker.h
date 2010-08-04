@@ -44,6 +44,18 @@ public:
         }
         
         jackpp::Port* port;
+
+/**
+ * @brief Constructs Speaker with 3-dim coordinates and orientation plus "bend"-compensation.
+ * @param name The speakername
+ * @param x x-coordinate
+ * @param y y-coordinate
+ * @param z z-coordinate
+ * @param nx normal x-coordinate 
+ * @param ny normal y-coordinate
+ * @param nz normal z-coordinate
+ * @param cos_alpha cosinus alpha to calculate deviation from speaker plain (speaker plain may be bended)
+ */
         Speaker( string name, float x, float y, float z, float normalx, float normaly, float normalz, float cosAlpha );
         
         const Vector2D& getPos()      const { return pos; }

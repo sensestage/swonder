@@ -134,7 +134,7 @@ void TwonderConfig::parseArgs( int argc, char** argv )
         switch( c )
         {
             case 'd':
-                daemon = 1;
+                daemon = true;
                 break;
 
             case 'c':
@@ -180,7 +180,7 @@ void TwonderConfig::parseArgs( int argc, char** argv )
                 break;
 
             case 'v':
-                verbose = 1;
+                verbose = true;
                 break;
 
             case 1:

@@ -4,7 +4,7 @@
  *  http://swonder.sourceforge.net                                                   *
  *                                                                                   *
  *                                                                                   *
- *  Technische Universität Berlin, Germany                                           *
+ *  Technische Universitï¿½t Berlin, Germany                                           *
  *  Audio Communication Group                                                        *
  *  www.ak.tu-berlin.de                                                              *
  *  Copyright 2006-2008                                                              *

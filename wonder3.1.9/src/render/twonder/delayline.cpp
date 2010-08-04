@@ -149,6 +149,7 @@ void DelayLine::get( DelayCoeff& coeff0, DelayCoeff& coeff1, float* samples, uns
     }
 
     float readPosStepSize  = 1.0 - ( ( (coeff1.getSampleDelay( maxDelay ) ) - coeff0.getSampleDelay( maxDelay ) ) / ( nsamples ) );
+    ///NOTE: old source has here 1.0 + ... ??
 
     float factor        =   coeff0.getFactor();
     float factorsDelta = ( coeff1.getFactor() - coeff0.getFactor() ) / ( nsamples - 1 );
@@ -213,6 +214,10 @@ void DelayLine::getInterp( DelayCoeff& coeff0, DelayCoeff& coeff1, float* sample
     float* readptr   = &( line[ readPos ] );
     float  interAdd = ( float ) dt / ( float ) signedNSamples;
 
+// Until i find out why it the noise is away,
+// i leave this at 1.0
+//
+// noise is almost inaudible at 0.5
 
 // #define INTERPOL_MUST_BE_1 1.0
 #define INTERPOL_MUST_BE_1 0.5
@@ -265,11 +270,12 @@ void DelayLine::getInterp( DelayCoeff& coeff0, DelayCoeff& coeff1, float* sample
                 factor       += dfactor;
             }
         }
-        else
+        else // -dt > signedNSamples
         {
             float interpol = INTERPOL_MUST_BE_1;
             int   sadd     = dt / signedNSamples + 1; // XXX:is this right? or: /(x+1) ???
             int   newDt   = ( -dt ) + ( dt / signedNSamples ) * signedNSamples; // XXX:right? or: ( a + b ) * c ???
+	    ///NOTE: this is indeed a little strange, as newDt now basically equals 0.
             int   acc      = signedNSamples / 2;
 
             for( int i = 0; i < signedNSamples; ++i )
@@ -380,11 +386,12 @@ void DelayLine::getInterp( DelayCoeff& coeff0, DelayCoeff& coeff1, float* sample
                 factor       += dfactor;
             }
         }
-        else 
+        else // dt > signedNSamples
         {
             float interpol = INTERPOL_MUST_BE_1;
             int sadd       = dt / signedNSamples - 1; // XXX: is this right? or: /(x-1) ???
             int newDt     = ( dt ) - ( dt / signedNSamples ) * signedNSamples; //XXX: right? or: ( a - b ) * c ???
+	    /// NOTE: similar, newDt is now just 0
             int acc        = signedNSamples / 2;
 
             for( int i = 0; i < signedNSamples; ++i )

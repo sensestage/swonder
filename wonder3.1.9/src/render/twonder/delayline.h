@@ -68,7 +68,7 @@ private:
         int   lineLength;
         float lineLengthF;
 
-        float  maxDelay;
+        float  maxDelay; // this is the maximum negative delay
         float* line;
         int    writePos;
         int    readPos;

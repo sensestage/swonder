@@ -60,7 +60,7 @@ public:
 	/**
 	 * @brief Get the delay in samples.
 	 *
-	 * @param negdelay  The maximus negative delay which is handled, before entering the magic non casual space. Where the most evil sounding distortions occur.
+	 * @param negdelay  The maximum negative delay which is handled, before entering the magic non casual space. Where the most evil sounding distortions occur.
 	 *                 This must be reality distortion or something ;)
 	 * 
 	 * Calculate the sample delay at SampleRate 44100 and Velocity of sound 340. Also makes the delay a casual delay by

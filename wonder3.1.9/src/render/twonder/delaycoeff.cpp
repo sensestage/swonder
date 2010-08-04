@@ -34,8 +34,9 @@ unsigned int DelayCoeff::getSampleDelayRounded( float preDelay )
     if( delay + preDelay < 0 )
         return 0;
     else
-        return ( unsigned int ) ( ( delay + preDelay ) * ( twonderConf->sampleRate / twonderConf->soundSpeed ) + 0.5 ); /// NOTE: why is there a 0.5 here??
-		/// NOTE: original source uses lrintf (is that an optimized cast?
+        return ( unsigned int ) ( ( delay + preDelay ) * ( twonderConf->sampleRate / twonderConf->soundSpeed ) + 0.5 ); 
+		/// NOTE: why is there a 0.5 here?? ensuring it is always >= 1?
+		/// NOTE: original source uses lrintf (is that an optimized cast?)
 }
 
 

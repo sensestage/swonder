@@ -3,6 +3,7 @@
  *  WONDER - Wave field synthesis Of New Dimensions of Electronic music in Realtime  *
  *  http://swonder.sourceforge.net                                                   *
  *                                                                                   *
+ *  Torben Hohn, Eddie Mond, Marije Baalman                                          *
  *                                                                                   *
  *  Technische Universität Berlin, Germany                                           *
  *  Audio Communication Group                                                        *
@@ -34,9 +35,11 @@
 Source::~Source()
 { }
 
+
 PositionSource::PositionSource( const Vector2D& p ) : position( p )
 { }
 
+// ------- point source -------
 
 bool PointSource::isFocused( const Vector2D& sourcePos ) const
 {
@@ -95,6 +98,16 @@ bool PointSource::isFocused( const Vector2D& sourcePos ) const
     return inside;
 }
 
+
+float hanning( float x ) {
+	return 0.5 * cosf( M_PI * x );
+}
+
+///NOTE: this "cleaned up"-version was scrubbed of some essential parts
+/// - slope correction
+/// - transition margin for focused sources (focus range -> focus limit)
+/// - global translate (necessary?)
+/// 
 DelayCoeff PointSource::calcDelayCoeff( const Speaker& speaker, const Vector2D& sourcePos )
 {
     Vector2D srcToSpkVec   = speaker.getPos() - sourcePos; 
@@ -102,6 +115,7 @@ DelayCoeff PointSource::calcDelayCoeff( const Speaker& speaker, const Vector2D& 
     float srcToSpkDistance = srcToSpkVec.length(); 
     float delay            = srcToSpkDistance;
     float cosphi           = normalProjection / srcToSpkDistance;
+    float window = 1.0; // used for interpolation out off focuslimit
 
     // define a circular area around the speakers in which we adjust the amplitude factor to get a smooth
     // transition when moving through the speakers ( e.g. from focussed to non-focussed sources )
@@ -114,6 +128,9 @@ DelayCoeff PointSource::calcDelayCoeff( const Speaker& speaker, const Vector2D& 
         // for focussed sources
         if( srcToSpkDistance > twonderConf->focusLimit )
             return DelayCoeff( 0.0, 0.0 );
+	else {
+	    window = hanning( srcToSpkDistance + twonderConf->focusLimit / twonderConf->focusMargin );
+	}
 
         // don't render this source if it in front of a this speaker 
         // but is not a focussed source
@@ -145,7 +162,7 @@ DelayCoeff PointSource::calcDelayCoeff( const Speaker& speaker, const Vector2D& 
         amplitudeFactor = behind + ( transitionRadius - normalProjection ) / ( 2 * transitionRadius) * ( focuss - behind );
     }
 
-    return DelayCoeff( delay, amplitudeFactor * speaker.getCosAlpha() );
+    return DelayCoeff( delay, amplitudeFactor * speaker.getCosAlpha() * window );
 }
 
 
@@ -170,6 +187,7 @@ void PointSource::doInterpolationStep( wonder_frames_t blocksize )
 PointSource::~PointSource()
 { }
 
+//--- plane wave ----
 
 DelayCoeff PlaneWave::calcDelayCoeff( const Speaker& speaker, const Angle& ang )
 {
@@ -198,9 +216,10 @@ DelayCoeff PlaneWave::getTargetDelayCoeff( const Speaker& speaker, wonder_frames
     return calcDelayCoeff( speaker, angle.getTargetValue( blocksize ) );
 }
 
-
+/// NOTE: original also applies interpolation step to position?
 void PlaneWave::doInterpolationStep( wonder_frames_t blocksize )
 {
+    position.doInterpolationStep( blocksize ); // re-added by MB; august 2010
     angle.doInterpolationStep( blocksize );
 }
 

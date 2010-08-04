@@ -49,6 +49,7 @@ public:
             return currentValue;
         }
 
+  /// @brief Get source position at the end of current sample block.
         const T getTargetValue( wonder_frames_t blocksize ) const
         {
             if( targetTime == ( wonder_frames_t  ) 0 )
@@ -59,6 +60,7 @@ public:
             }
         }
 
+/// @brief Set current source to the position it should be at the end of current sample block.  
         void doInterpolationStep( wonder_frames_t blocksize ) 
         {
             if( targetTime == ( wonder_frames_t ) 0 )
@@ -69,13 +71,15 @@ public:
                 targetTime -= blocksize;
             }
         }
-            
+
+/// @brief Sets new target position and time.
         void setTargetValue( const T& value, TimeStamp transitionTime = 0.f )
         {
             targetValue  = value;
             targetTime   = transitionTime;
         }
 
+/// @brief Sets current position.
         void setCurrentValue( const T& value )
         {
             currentValue     = value;
