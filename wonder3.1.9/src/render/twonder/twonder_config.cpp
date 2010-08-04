@@ -80,6 +80,7 @@ TwonderConfig::TwonderConfig( int argc, char** argv )
     elevationZ1 = 0.0;
     elevationZ2 = 0.0;
     slope       = 0.0;
+    hasSlope = false;
 
     parseArgs( argc, argv );
 

@@ -176,16 +176,16 @@ void DelayLine::getInterp( DelayCoeff& coeff0, DelayCoeff& coeff1, float* sample
 {
     int signedNSamples = nsamples;
 
-    float factor  = coeff0.getFactor();
-    float dfactor = ( coeff1.getFactor() - coeff0.getFactor() ) / signedNSamples;
+    float factor  = coeff0.getFactor(); // amplitude factor of coefficient 0
+    float dfactor = ( coeff1.getFactor() - coeff0.getFactor() ) / signedNSamples; // difference step per sample of amplitude factor of coeff0 - amplitude factor of coeff1.
 
-    int c0delay = coeff0.getSampleDelayRounded( maxDelay );
-    int c1delay = coeff1.getSampleDelayRounded( maxDelay );
+    int c0delay = coeff0.getSampleDelayRounded( maxDelay ); // delay in samples of coef0
+    int c1delay = coeff1.getSampleDelayRounded( maxDelay ); // delay in samples of coef1
 
 
 
     // XXX: dt < 0 !!!!
-    int readPos = writePos - signedNSamples - c0delay;
+    int readPos = writePos - signedNSamples - c0delay; // readposition at delay of coeff0 (begin position)
     if( readPos < 0 )
         readPos += lineLength;
 
@@ -210,9 +210,13 @@ void DelayLine::getInterp( DelayCoeff& coeff0, DelayCoeff& coeff1, float* sample
     }
 
     // XXX: c0 - c1 ? 
-    int    dt        = c0delay - c1delay + signedNSamples;
+// if the delay gets smaller (source closer) then I need to read closer to the write position (so less samples).
+// if the delay gets larger, I need to move to further from the write position (so more samples).
+    int    dt        = c0delay - c1delay + signedNSamples; // how many samples I need to read in this block
+// alternate version... seems to make more sense. c1-c0 is how many extra samples I need to read. nsamples is the blocksize
+//    int    dt        = c1delay - c0delay + signedNSamples; // how many samples I need to read in this block
     float* readptr   = &( line[ readPos ] );
-    float  interAdd = ( float ) dt / ( float ) signedNSamples;
+    float  interAdd = ( float ) dt / ( float ) signedNSamples; // how many samples per sample step I need to read
 
 // Until i find out why it the noise is away,
 // i leave this at 1.0
@@ -222,15 +226,15 @@ void DelayLine::getInterp( DelayCoeff& coeff0, DelayCoeff& coeff1, float* sample
 // #define INTERPOL_MUST_BE_1 1.0
 #define INTERPOL_MUST_BE_1 0.5
 
-    if( dt < 0 )
+    if( dt < 0 ) // I need to read backwards in the buffer, i.e. really big jumps in source location to a closer position
     {
-        while( interAdd <= -1.0 )
+        while( interAdd <= -1.0 ) // interAdd always between -1 and 0; -1 < interAdd < 0
             interAdd += 1.0;
 
-        if( -dt <= signedNSamples )
+        if( -dt <= signedNSamples ) // |dt| < nsamples, so "dx < dy"
         {
-            float interpol=INTERPOL_MUST_BE_1;
-            int   acc     = signedNSamples / 2;
+            float interpol= INTERPOL_MUST_BE_1; // is correct at 0.5, as this is half a sample...
+            int   acc     = signedNSamples / 2; // this is the error accumulation factor in the samples direction
 
             for( int i = 0; i < signedNSamples; ++i )
             {
@@ -239,24 +243,24 @@ void DelayLine::getInterp( DelayCoeff& coeff0, DelayCoeff& coeff1, float* sample
                 out     *= interpol;
                 interpol = 1.0 - interpol;
 
-                --readptr; 
-                if( readptr < line )
+                --readptr; // reading backwards
+                if( readptr < line ) // line is the pointer to the start of the buffer, so if we reach it, we go to the end of the buffer again
                     readptr+=lineLength;
 
-                out      += ( *readptr ) * interpol;
-                interpol += interAdd;
-                if( interpol < 0.0 )
+                out      += ( *readptr ) * interpol; // we read what is in the buffer and multiply with the interpolation value
+                interpol += interAdd;  // increase interpol with interadd (number of samples to read per sample
+                if( interpol < 0.0 ) // interpol always between 0 and 1
                     interpol += 1.0;
 
-                interpol = 1.0 - interpol;
+                interpol = 1.0 - interpol; // interpol now between 1 and 0 (inversion)
 
-                acc += dt; // dt < 0
+                acc += dt; // dt < 0 // decrease (since dt < 0) accumulation of error
 
                 if( acc<0 ) 
                     acc += signedNSamples;
                 else 
                 {
-                    ++readptr;
+                    ++readptr; // why is the readpointer increased here?
                     if( readptr >= ( line + lineLength ) )
                     {
                         readptr -= lineLength;
@@ -266,15 +270,15 @@ void DelayLine::getInterp( DelayCoeff& coeff0, DelayCoeff& coeff1, float* sample
                     }
                 }
 
-                samples[ i ] += out * factor;
-                factor       += dfactor;
+                samples[ i ] += out * factor; //output sample is mulitiplied with the factor
+                factor       += dfactor; // we adjust the factor with the difference between c0 and c1 factor
             }
         }
-        else // -dt > signedNSamples
+        else // -dt > signedNSamples, i.e. more samples to output than in one block, i.e. dx > dy.
         {
             float interpol = INTERPOL_MUST_BE_1;
-            int   sadd     = dt / signedNSamples + 1; // XXX:is this right? or: /(x+1) ???
-            int   newDt   = ( -dt ) + ( dt / signedNSamples ) * signedNSamples; // XXX:right? or: ( a + b ) * c ???
+            int   sadd     = dt / signedNSamples + 1; // XXX:is this right? or: /(x+1) ??? // what does this mean?
+            int   newDt   = ( -dt ) + ( dt / signedNSamples ) * signedNSamples; // XXX:right? or: ( a + b ) * c ??? // what is this for?
 	    ///NOTE: this is indeed a little strange, as newDt now basically equals 0.
             int   acc      = signedNSamples / 2;
 
@@ -334,10 +338,10 @@ void DelayLine::getInterp( DelayCoeff& coeff0, DelayCoeff& coeff1, float* sample
     }
     else  // dt >=0
     {
-        while( interAdd >= 1.0 )
+        while( interAdd >= 1.0 ) // interAdd alsways between 0 and 1
             interAdd -= 1.0;
 
-        if( dt <= signedNSamples )
+        if( dt <= signedNSamples ) // |dt| < nsamples (less samples to output than in one block)
         {
 
             float interpol= INTERPOL_MUST_BE_1;
@@ -361,18 +365,18 @@ void DelayLine::getInterp( DelayCoeff& coeff0, DelayCoeff& coeff1, float* sample
                 }
 
                 out      += ( *readptr ) * interpol;
-                interpol += interAdd;
-                if( interpol >= 1.0 )
+                interpol += interAdd; // interAdd is always between 0 and 1 in this case
+                if( interpol >= 1.0 ) // we substract 1 from interpol if necessary to be between 0 and 1 again
                     interpol -= 1.0;
-                interpol = 1.0 - interpol;
+                interpol = 1.0 - interpol; // we invert it for the next round through this loop
 
-                acc -= dt; // dt > 0
+                acc -= dt; // dt > 0 // we decrease the errorthing... as dt < nsamples, this will happen a couple (one or two, more if slower movements) of times before acc is smaller than 0.
 
-                if( acc<0 ) 
+                if( acc<0 )  // if this is smaller than zero, then we need to reset it to a higher value
                     acc += signedNSamples;
                 else
                 {
-                    --readptr;
+                    --readptr; // we go back one sample, i.e. we stay at the sample where we were reading previously
                     if( readptr < line )
                     {
                         readptr += lineLength;
@@ -386,7 +390,7 @@ void DelayLine::getInterp( DelayCoeff& coeff0, DelayCoeff& coeff1, float* sample
                 factor       += dfactor;
             }
         }
-        else // dt > signedNSamples
+        else // dt > signedNSamples (more samples to output than in one block)
         {
             float interpol = INTERPOL_MUST_BE_1;
             int sadd       = dt / signedNSamples - 1; // XXX: is this right? or: /(x-1) ???
@@ -416,14 +420,14 @@ void DelayLine::getInterp( DelayCoeff& coeff0, DelayCoeff& coeff1, float* sample
                     interpol -= 1.0;
                 interpol = 1.0 - interpol;
 
-                acc -= newDt; 
+                acc -= newDt; // newDt is supposed to be what.. the formula makes no sense...
 
                 if( acc <= 0 )
                 {
                     acc += signedNSamples; 
-                    readptr++;
+                    readptr++; // we go one sample extra forward, whenever we reset the fehler accumulation
                 }
-                readptr += sadd;
+                readptr += sadd; // increase the readpointer with sadd... extra step per sample?
                 if( readptr >= ( line + lineLength ) ) 
                 {
                     readptr -= lineLength;

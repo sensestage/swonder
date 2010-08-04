@@ -95,6 +95,7 @@ public:
     float elevationZ1;
     float elevationZ2;
     float slope;
+    bool hasSlope;
         
 private:
     void parseArgs( int argc, char** argv );

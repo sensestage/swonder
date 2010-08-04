@@ -136,14 +136,25 @@ DelayCoeff PointSource::calcDelayCoeff( const Speaker& speaker, const Vector2D& 
         // but is not a focussed source
         if( ( ! isFocused( sourcePos ) ) && ( srcToSpkDistance > transitionRadius ) )
             return DelayCoeff( 0.0, 0.0 );
-
+	if ( twonderConf->hasSlope ){
+	  // we need a slope correction in case the speaker array has a slope
+	  Vector3D src3D( sourcePos[0], sourcePos[1], 
+			    sourcePos[1] < twonderConf->elevationY1 ? 
+			      twonderConf->elevationZ1 : 
+			      (twonderConf->elevationZ1 + (sourcePos[1]-twonderConf->elevationY1) * (twonderConf->slope) ) 
+	  );
+	  Vector3D diff3D = speaker.get3DPos() - src3D;
+	  normalProjection = diff3D * speaker.get3DNormal();
+	  srcToSpkDistance = -diff3D.length();
+	}
         // if rendering focussed sources we need to use a "negative delay",
         // i.e. make use of a certain amount of already added pre delay
         // and so we don't get any phase inversion we only use positve numbers
         // for our calculations
         delay            = - delay;
+	//NOTE: I'm not sure if these should be negative... (MB)
         cosphi           = - cosphi;
-        normalProjection = - normalProjection;
+     //   normalProjection = - normalProjection;
     } 
 
     float amplitudeFactor = 0.0;

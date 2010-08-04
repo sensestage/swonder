@@ -689,6 +689,31 @@ int oscRenderPolygonHandler( handlerArgs )
     return 0;
 }
 
+int oscElevationHandler( handlerArgs )
+{
+    // parse incoming points
+
+    // argv[ 0 ] is the roomname, drop it, we don't need that
+    // get number of points 
+
+    // iterate over all points and store them
+    twonderConf->elevationY1 = argv[ 1 ]->f;
+    twonderConf->elevationZ1 = argv[ 2 ]->f;
+    twonderConf->elevationY2 = argv[ 3 ]->f;
+    twonderConf->elevationZ2 = argv[ 4 ]->f;
+    
+    // TODO:calculate elevation of speakers
+    twonderConf->slope = ( twonderConf->elevationZ2 - twonderConf->elevationZ1 ) / ( twonderConf->elevationY2 - twonderConf->elevationY1 );
+  
+    if ( fabs( twonderConf->slope ) > 1e-3 ){
+	twonderConf->hasSlope = true;
+    } else {
+	twonderConf->hasSlope = false;
+    }
+    
+    return 0;
+}
+
 int oscGenericHandler( handlerArgs )
 {
     cout << endl << "[twonder]: received unknown osc message: " << path << endl;
@@ -1038,6 +1063,7 @@ int main( int argc, char** argv )
     oscServer->addMethod( "/WONDER/source/dopplerEffect",      "iif",    oscSrcDopplerHandler );
     oscServer->addMethod( "/WONDER/global/maxNoSources",       "i",      oscNoSourcesHandler );
     oscServer->addMethod( "/WONDER/global/renderpolygon",      NULL,     oscRenderPolygonHandler );
+    oscServer->addMethod( "/WONDER/global/elevation",          NULL,     oscElevationHandler );    
     oscServer->addMethod( "/WONDER/stream/render/ping",        "i",      oscPingHandler );
     oscServer->addMethod( NULL,                                NULL,     oscGenericHandler );  
     oscServer->start();
