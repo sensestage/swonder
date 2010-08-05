@@ -100,7 +100,7 @@ bool PointSource::isFocused( const Vector2D& sourcePos ) const
 
 
 float hanning( float x ) {
-	return cosf( M_PI * x );
+	return 0.5*cosf( M_PI * x ) + 0.5;
 }
 
 ///NOTE: this "cleaned up"-version was scrubbed of some essential parts
