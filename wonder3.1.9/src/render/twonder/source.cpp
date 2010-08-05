@@ -100,7 +100,7 @@ bool PointSource::isFocused( const Vector2D& sourcePos ) const
 
 
 float hanning( float x ) {
-	return 0.5 * cosf( M_PI * x );
+	return cosf( M_PI * x );
 }
 
 ///NOTE: this "cleaned up"-version was scrubbed of some essential parts
@@ -116,6 +116,7 @@ DelayCoeff PointSource::calcDelayCoeff( const Speaker& speaker, const Vector2D& 
     float delay            = srcToSpkDistance;
     float cosphi           = normalProjection / srcToSpkDistance;
     float window = 1.0; // used for interpolation out off focuslimit
+    float inFocus; // variable to calculate whether within the focus margin
 
     // define a circular area around the speakers in which we adjust the amplitude factor to get a smooth
     // transition when moving through the speakers ( e.g. from focussed to non-focussed sources )
@@ -128,8 +129,9 @@ DelayCoeff PointSource::calcDelayCoeff( const Speaker& speaker, const Vector2D& 
         // for focussed sources
         if( srcToSpkDistance > twonderConf->focusLimit )
             return DelayCoeff( 0.0, 0.0 );
-	else {
-	    window = hanning( srcToSpkDistance + twonderConf->focusLimit / twonderConf->focusMargin );
+	inFocus = twonderConf->focusLimit - srcToSpkDistance;
+	if ( inFocus < twonderConf->focusMargin ){ // fade out within (fadelimit - fademargin up to fadelimit
+	    window = hanning( inFocus / twonderConf->focusMargin );
 	}
 
         // don't render this source if it in front of a this speaker 
