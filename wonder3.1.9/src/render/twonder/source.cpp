@@ -105,8 +105,8 @@ float hanning( float x ) {
 
 ///NOTE: this "cleaned up"-version was scrubbed of some essential parts
 /// - slope correction
-/// - transition margin for focused sources (focus range -> focus limit)
-/// - global translate (necessary?)
+/// - transition margin for focused sources (focus range -> focus limit) -> fixed now
+/// - global translate (necessary? --> was used for headphone modus, which could be interesting to re-implement)
 /// 
 DelayCoeff PointSource::calcDelayCoeff( const Speaker& speaker, const Vector2D& sourcePos )
 {
@@ -153,10 +153,10 @@ DelayCoeff PointSource::calcDelayCoeff( const Speaker& speaker, const Vector2D& 
         // i.e. make use of a certain amount of already added pre delay
         // and so we don't get any phase inversion we only use positve numbers
         // for our calculations
-        delay            = - delay;
+        delay            = - delay; // yes, negative delay, will be substracted effectively from the predelay
 	//NOTE: I'm not sure if these should be negative... (MB)
-        cosphi           = - cosphi;
-     //   normalProjection = - normalProjection;
+        cosphi           = - cosphi; // yes, this one is absolute
+     //   normalProjection = - normalProjection; // this one is not used anymore further on
     } 
 
     float amplitudeFactor = 0.0;
@@ -164,7 +164,9 @@ DelayCoeff PointSource::calcDelayCoeff( const Speaker& speaker, const Vector2D& 
     // calculate amplitudefactor according to being in- or outside the transition area around the speakers
     if( srcToSpkDistance > transitionRadius )
     {
-        amplitudeFactor = ( sqrtf( twonderConf->reference / ( twonderConf->reference + normalProjection ) ) ) * ( cosphi / sqrtf( srcToSpkDistance ) );
+	// delay is signed srcSpkDistance
+	amplitudeFactor = ( sqrtf( twonderConf->reference / ( twonderConf->reference + delay ) ) ) * ( cosphi / sqrtf( srcToSpkDistance ) );
+        //amplitudeFactor = ( sqrtf( twonderConf->reference / ( twonderConf->reference + normalProjection ) ) ) * ( cosphi / sqrtf( srcToSpkDistance ) );
     }
     else
     {
@@ -172,7 +174,7 @@ DelayCoeff PointSource::calcDelayCoeff( const Speaker& speaker, const Vector2D& 
         float behind = sqrtf( twonderConf->reference / ( twonderConf->reference + transitionRadius ) ) / sqrtf( transitionRadius );
         float focuss = sqrtf( twonderConf->reference / ( twonderConf->reference - transitionRadius ) ) / sqrtf( transitionRadius );
 
-        amplitudeFactor = behind + ( transitionRadius - normalProjection ) / ( 2 * transitionRadius) * ( focuss - behind );
+        amplitudeFactor = behind + ( transitionRadius - delay ) / ( 2 * transitionRadius) * ( focuss - behind );
     }
 
     return DelayCoeff( delay, amplitudeFactor * speaker.getCosAlpha() * window );
