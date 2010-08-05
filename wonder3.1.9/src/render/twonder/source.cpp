@@ -122,6 +122,9 @@ DelayCoeff PointSource::calcDelayCoeff( const Speaker& speaker, const Vector2D& 
     float cosphi           = normalProjection / srcToSpkDistance;
     float window = 1.0; // used for interpolation out off focuslimit
     float inFocus; // variable to calculate whether within the focus margin
+    
+    #define focusAngularMax 0.75
+    #define focusAngularMaxRange 0.1
 
     // define a circular area around the speakers in which we adjust the amplitude factor to get a smooth
     // transition when moving through the speakers ( e.g. from focussed to non-focussed sources )
@@ -134,9 +137,17 @@ DelayCoeff PointSource::calcDelayCoeff( const Speaker& speaker, const Vector2D& 
         // for focussed sources
         if( srcToSpkDistance > twonderConf->focusLimit )
             return DelayCoeff( 0.0, 0.0 );
+
+	if ( cosphi > focusAngularMax ) // if angle too large with the speaker array, we don't play this back to avoid too early arriving contributions to the wave front
+	    return DelayCoeff( 0.0, 0.0 );
+	
 	inFocus = twonderConf->focusLimit - srcToSpkDistance;
 	if ( inFocus < twonderConf->focusMargin ){ // fade out within (fadelimit - fademargin up to fadelimit
 	    window = hanning( inFocus / twonderConf->focusMargin );
+	}
+	inFocus = focusAngularMax - cosphi;
+	if ( inFocus < focusAngularMaxRange ){ // fade out within (fadelimit - fademargin up to fadelimit
+	    window = window * hanning( inFocus / focusAngularMaxRange );
 	}
 
         // don't render this source if it in front of a this speaker 
@@ -162,7 +173,7 @@ DelayCoeff PointSource::calcDelayCoeff( const Speaker& speaker, const Vector2D& 
         // for our calculations
         delay            = - delay; // yes, negative delay, will be substracted effectively from the predelay
 	//NOTE: I'm not sure if these should be negative... (MB)
-        // cosphi           = - cosphi; // yes, this one is absolute
+        cosphi           = - cosphi; // yes, this one is absolute
      //   normalProjection = - normalProjection; // this one is not used anymore further on
     } 
 
