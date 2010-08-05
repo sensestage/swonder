@@ -152,8 +152,10 @@ DelayCoeff PointSource::calcDelayCoeff( const Speaker& speaker, const Vector2D& 
 	  );
 	  Vector3D diff3D = speaker.get3DPos() - src3D;
 	  normalProjection = diff3D * speaker.get3DNormal();
-	  srcToSpkDistance = -diff3D.length();
+	  srcToSpkDistance = diff3D.length();
+	  delay = srcToSpkDistance;
 	}
+      
         // if rendering focussed sources we need to use a "negative delay",
         // i.e. make use of a certain amount of already added pre delay
         // and so we don't get any phase inversion we only use positve numbers
