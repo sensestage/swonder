@@ -162,7 +162,7 @@ DelayCoeff PointSource::calcDelayCoeff( const Speaker& speaker, const Vector2D& 
         // for our calculations
         delay            = - delay; // yes, negative delay, will be substracted effectively from the predelay
 	//NOTE: I'm not sure if these should be negative... (MB)
-        cosphi           = - cosphi; // yes, this one is absolute
+        // cosphi           = - cosphi; // yes, this one is absolute
      //   normalProjection = - normalProjection; // this one is not used anymore further on
     } 
 
