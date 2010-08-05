@@ -97,6 +97,8 @@ public:
         {
             type          = 1;
             dopplerEffect = true;
+	    didFocusCalc = false;
+	    wasFocused = false;
         }
 
         DelayCoeff getDelayCoeff( const Speaker& spk );
@@ -107,7 +109,9 @@ public:
 private:
         DelayCoeff calcDelayCoeff( const Speaker& spk, const Vector2D& vec );
 
-        bool isFocused( const Vector2D& src ) const;
+        bool isFocused( const Vector2D& src );
+	bool didFocusCalc;
+	bool wasFocused;
 };
 
 class PlaneWave : public PositionSource

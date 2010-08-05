@@ -41,7 +41,7 @@ PositionSource::PositionSource( const Vector2D& p ) : position( p )
 
 // ------- point source -------
 
-bool PointSource::isFocused( const Vector2D& sourcePos ) const
+bool PointSource::isFocused( const Vector2D& sourcePos )
 {
     if( twonderConf->ioMode == IOM_ALWAYSOUT )
         return false;
@@ -49,26 +49,30 @@ bool PointSource::isFocused( const Vector2D& sourcePos ) const
     if( twonderConf->ioMode == IOM_ALWAYSIN ) 
         return true;
 
+    if ( didFocusCalc ){
+	return wasFocused;
+    }
+
     int noPoints = twonderConf->renderPolygon.size();
-    float xSrc = sourcePos[ 0 ]; 
-    float ySrc = sourcePos[ 1 ];
-    float xnew;
-    float ynew;
-    float xold;
-    float yold;
-    float x1;
-    float y1;
-    float x2;
-    float y2;
+    double xSrc = (double) sourcePos[ 0 ]; 
+    double ySrc = (double) sourcePos[ 1 ];
+    double xnew;
+    double ynew;
+    double xold;
+    double yold;
+    double x1;
+    double y1;
+    double x2;
+    double y2;
     bool inside = false;
 
-    xold = twonderConf->renderPolygon[ noPoints - 1 ][ 0 ];
-    yold = twonderConf->renderPolygon[ noPoints - 1 ][ 1 ];
+    xold = (double) twonderConf->renderPolygon[ noPoints - 1 ][ 0 ];
+    yold = (double) twonderConf->renderPolygon[ noPoints - 1 ][ 1 ];
 
     for( int i = 0 ; i < noPoints ; ++i )
     {
-          xnew = twonderConf->renderPolygon[ i ][ 0 ];
-          ynew = twonderConf->renderPolygon[ i ][ 1 ];
+          xnew = (double) twonderConf->renderPolygon[ i ][ 0 ];
+          ynew = (double) twonderConf->renderPolygon[ i ][ 1 ];
           
           if( xnew > xold ) 
           {
@@ -94,7 +98,8 @@ bool PointSource::isFocused( const Vector2D& sourcePos ) const
           yold = ynew;
      }
 
-
+    didFocusCalc = true;
+    wasFocused = inside;
     return inside;
 }
 
@@ -164,7 +169,7 @@ DelayCoeff PointSource::calcDelayCoeff( const Speaker& speaker, const Vector2D& 
     // calculate amplitudefactor according to being in- or outside the transition area around the speakers
     if( srcToSpkDistance > transitionRadius )
     {
-	// delay is signed srcSpkDistance
+	// delay is a signed version of srcSpkDistance
 	amplitudeFactor = ( sqrtf( twonderConf->reference / ( twonderConf->reference + delay ) ) ) * ( cosphi / sqrtf( srcToSpkDistance ) );
         //amplitudeFactor = ( sqrtf( twonderConf->reference / ( twonderConf->reference + normalProjection ) ) ) * ( cosphi / sqrtf( srcToSpkDistance ) );
     }
@@ -173,10 +178,10 @@ DelayCoeff PointSource::calcDelayCoeff( const Speaker& speaker, const Vector2D& 
 
         float behind = sqrtf( twonderConf->reference / ( twonderConf->reference + transitionRadius ) ) / sqrtf( transitionRadius );
         float focuss = sqrtf( twonderConf->reference / ( twonderConf->reference - transitionRadius ) ) / sqrtf( transitionRadius );
-
+	// delay is a signed version of srcSpkDistance, so the point is closer to focus when delay < 0
         amplitudeFactor = behind + ( transitionRadius - delay ) / ( 2 * transitionRadius) * ( focuss - behind );
     }
-
+    // speaker.getCosAlpha is the amplitude correction for the elevation compensation
     return DelayCoeff( delay, amplitudeFactor * speaker.getCosAlpha() * window );
 }
 
@@ -195,6 +200,7 @@ DelayCoeff PointSource::getTargetDelayCoeff( const Speaker& speaker, wonder_fram
 
 void PointSource::doInterpolationStep( wonder_frames_t blocksize )
 {
+    didFocusCalc = false;
     position.doInterpolationStep( blocksize );
 }
 
