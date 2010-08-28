@@ -2,10 +2,11 @@
 SWonder {
 	classvar <>default;
 	var <>sources, <cWonder, responders, <connected, <drawGUI;
-	var <window, winWidth = 460, winHeigth = 460, touchDist = 15, touchedSrc, turnSrc;
-	var <room, <scaledRoom, <>angleOffset=180, <>invertX, <>invertY, <wndXMax, <wndXMin, <wndYMax, <wndYMin;
-	var <>maxOut = 2;
+	
+	var <room, <scaledRoom, <>invertX, <>invertY, <wndXMax, <wndXMin, <wndYMax, <wndYMin;
 	var <>debug = false;
+
+	var <>gui;
 
 	setDefault{
 		default = this;
@@ -43,7 +44,7 @@ SWonder {
 				}),		
 			OSCresponderNode(nil, '/WONDER/source/activate', {|t, r, msg| 
 				var id = msg[1];
-				if (sources[id].isNil) {sources[id] = SWonderSrc.new.id_(id)
+				if (sources[id].isNil) {sources[id] = SWonderSrc.new(this).id_(id)
 					.name_(id.asString) // dirty - wonder doesn't send names when connecting to stream
 					};
 				if (debug) {msg.postln};
@@ -55,9 +56,11 @@ SWonder {
 				}),
 			OSCresponderNode(nil, '/WONDER/source/position', {|t, r, msg| 
 				var id = msg[1];
-				if (touchedSrc.isNil) {
-					sources[id].position_( this.wonder2norm(msg[2] @ msg[3]) )
+				if ( gui.notNil ){
+					if ( gui.touchedSrc.isNil) {
+						sources[id].position_( msg[2] @ msg[3] )
 					};
+				};
 				if (debug) {msg.postln};
 				}),
 			OSCresponderNode(nil, '/WONDER/source/type', {|t, r, msg| 
@@ -120,11 +123,12 @@ SWonder {
 	
 	sendPosition { |id, dur= 0|
 		var position = sources[id].position;
-		position = this.norm2wonder(position);
+		//		position = this.norm2wonder(position);
 		cWonder.sendMsg('/WONDER/source/position', id, position.x, position.y, dur);
 		if (debug) {["send", '/WONDER/source/position', id, position.x, position.y, dur].postln};
 		}
 
+	/*
 	sendRawPosition { |id, position, dur= 0|
 		//	var position = sources[id].position;
 		//	position = this.norm2wonder(position);
@@ -132,7 +136,8 @@ SWonder {
 		cWonder.sendMsg('/WONDER/source/position', id, position.x, position.y, dur);
 		if (debug) {["send", '/WONDER/source/position', id, position.x, position.y, dur].postln};
 		}
-	
+	*/
+
 	sendType { |id|
 		var type;
 		if (sources[id].plane) { type=0 } { type=1 };
@@ -175,21 +180,24 @@ SWonder {
 		if (connected) { cWonder.sendMsg('/WONDER/project/save') }
 		}
 		
-	addSource{ |id, position|
-		var source = SWonderSrc.new;
+	addSource{ |id, position, normalised=false|
+		var source = SWonderSrc.new(this);
 		position ?? Point(0,0);
 		source.id_(id);
 		source.name_(id.asString);
-		source.position = position;
+		if ( normalised ){
+			source.normalisedPosition = position;
+		}{
+			source.position = position;
+		}
 		sources[id] = source;
-		if (connected) {this.sendActivate(id); this.sendName(id, id.asString); 
-				this.sendColor(id); this.sendPosition(id); this.sendType(id) };
+		if (connected) {this.sendActivate(id); this.sendName(id, id.asString); this.sendType(id); this.sendColor(id); this.sendPosition(id); };
 		}
 		
-	addNextSource { |point|
+	addNextSource { |point, norm=false|
 		var id;
 		if (point.isNil) { point = Point(0,0) };
-		10000.do{ |i| if (sources[i] == nil) { this.addSource(i, point); ^i} };
+		10000.do{ |i| if (sources[i] == nil) { this.addSource(i, point, norm); ^i} };
 		
 		}
 		
@@ -203,6 +211,12 @@ SWonder {
 		sources[id].position = point;
 		if (connected) {this.sendPosition(id, dur)}}	
 		}
+
+	sourceNormPosition { |id, point, dur= 0|
+		if (sources[id].notNil) {
+			sources[id].normalisedPosition = point;
+			if (connected) {this.sendPosition(id, dur)}}	
+	}
 
 	sourcePlane { |id, bla|
 		if (sources[id].notNil) {
@@ -252,105 +266,18 @@ SWonder {
 		}
 		
 	drawGUI_{ |bla|
-		if (bla) { if (drawGUI.not) {drawGUI= true; this.createGUI} }
-			{ if (drawGUI) {drawGUI= false; window.close} }
-		}
-		
+		if (bla) { 
+			if (drawGUI.not) 
+			{drawGUI= true; this.createGUI} }
+			{ if (drawGUI) 
+				{drawGUI= false; gui.close; gui = nil }
+			}
+	}
+	
 	createGUI {
-		var view;
-		window = Window(\wonder, Rect(100, 100, winWidth, winHeigth))
-			.front
-			.onClose_({this.drawGUI_(false)});
-		view = UserView(window, Rect(0, 0, winWidth, winHeigth))
-			.background_(Color.new255(247, 247, 247))
-			.resize_(5)
-			.drawFunc_({
-				winWidth = window.bounds.width;
-				winHeigth = window.bounds.height;
-				Pen.color_(Color.new255(174, 123, 229, 70));
-				Pen.addRect(Rect( 0, winHeigth/(maxOut*2)*(maxOut-1), winWidth, winHeigth/maxOut));
-				Pen.addRect(Rect(winWidth/(maxOut*2)*(maxOut-1), 0, winWidth/maxOut, winHeigth));
-				Pen.draw;
-				Pen.strokeColor_(Color.grey);
-				Pen.fillColor_(Color.new255(154, 255, 154, 110));
-				Pen.moveTo(this.norm2gui(scaledRoom.last));
-				scaledRoom.do{ |pt| Pen.lineTo(this.norm2gui(pt)) };
-				Pen.fillStroke;
-				sources.do{ |src|
-						var pt = this.norm2gui(src.position);
-					try {
-						Pen.color_(src.color);
-							if (src.plane) {
-								Pen.addWedge(pt, 12, (src.angle+angleOffset-22.5).degrad, pi/4);	
-								} {	
-								Pen.addArc(pt, 4, 0, 2*pi);
-								};
-						
-								Pen.draw;
-							};
-							Pen.color_(Color.black);
-							Pen.stringAtPoint(src.name.asString, pt.x+3 @ pt.y);
-							Pen.draw;	
-					};
-				})
-			.mouseDownAction_({|me, x, y, mod, button|
-				var closestSrc = this.closestSrc( this.gui2norm( x@y ) );
-				if ( closestSrc.isNil.not ) {
-					if (this.norm2gui(closestSrc.position).dist( x@y) <= touchDist ) {
-						touchedSrc = closestSrc;
-						}
-					}
-				})
-			.mouseUpAction_({|me, x, y, mod|
-				touchedSrc = nil;
-				turnSrc = nil;
-				})
-			.mouseMoveAction_({|me, x, y, mod|
-				if (turnSrc.notNil)
-					{ this.sourceAngle(turnSrc.id, turnSrc.position.y - y)  } {
-					if (touchedSrc.isNil.not)
-						{ this.sourcePosition(touchedSrc.id, this.gui2norm( x@y ) ) }
-					};
-				})
-			.keyDownAction_({|a, b, c, d, e |
-				if (touchedSrc.isNil.not) {
-					switch ( d )
-						{ 114 } { this.removeSource(touchedSrc.id); touchedSrc = nil }
-						{ 116 } { this.sourcePlane( touchedSrc.id, touchedSrc.plane.not ) }
-						{  97 } { turnSrc = touchedSrc; }
-						} {
-					switch ( d )
-						{  97 } { this.addNextSource  }
-						}
-				})
-			.keyUpAction_({|a, b, c, d, e |
-				switch ( d )
-					{  97 } { turnSrc = nil }
-				});
-			if (GUI.current.id == \cocoa ) { view.animate_(true) }
-				{ fork { while({ window.isClosed.not }, { window.refresh; (1/5).wait })}; }
-		}
-		
-	closestSrc { |pt|
-		var closestSrc, dist = inf;
-		sources.do{ |src|
-			if (abs(src.position.dist(pt)) < dist) {
-					dist = abs(src.position.dist(pt));
-					closestSrc = src;
-				}
-			};
-		^closestSrc
-		}
+		gui = SWonderGUI.new( this );
+	}
 
-	norm2gui {|pt|
-		^pt.x.linlin(-1 , 1, winWidth/(maxOut*2)*(maxOut-1), winWidth/(maxOut*2)*(maxOut+1), nil) @
-			pt.y.linlin(-1 , 1, winHeigth/(maxOut*2)*(maxOut+1), winHeigth/(maxOut*2)*(maxOut-1), nil) 
-		}
-		
-	gui2norm { |pt|
-		^pt.x.linlin(winWidth/(maxOut*2)*(maxOut-1), winWidth/(maxOut*2)*(maxOut+1), -1, 1, nil) @
-			pt.y.linlin(winHeigth/(maxOut*2)*(maxOut-1), winHeigth/(maxOut*2)*(maxOut+1), 1, -1, nil) 
-		}
 	
 	wonder2norm { |pt| 
 		var x = pt.x.linlin( wndXMin, wndXMax, -1, 1, nil );
@@ -370,7 +297,7 @@ SWonder {
 		}
 			
 	free {
-		if (drawGUI) {window.close};
+		if (drawGUI) { gui.close };
 		this.disconnect;
 		responders.do{ |resp| resp.remove; };
 		^super.free
@@ -393,9 +320,13 @@ SWonder {
 
 
 SWonderSrc {
-	var <>id, <>position, <>plane, <>angle, <>doppler, <>color, <>name;	
-	*new { |id, position, plane, angle, doppler, color, name|
+	var <>swonder;
+	var <>id, <position, <>plane, <>angle, <>doppler, <>color, <>name;
+
+	var <normalisedPosition;
+	*new { |swonder,id, position, plane, angle, doppler, color, name|
 		^super.newCopyArgs(
+			swonder ?? SWonder.default,
 			id ?? 0,
 			position ?? Point(0,0),
 			plane ?? false,
@@ -405,4 +336,12 @@ SWonderSrc {
 			name ?? "0"
 			);
 		}
+
+	position_{ |pos|
+		normalisedPosition = swonder.wonder2norm( pos );
+	}
+
+	normalisedPosition_{ |npos|
+		position = swonder.norm2wonder( npos );
+	}
 }
