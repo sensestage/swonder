@@ -1,0 +1,11 @@
+(
+	\name: 			"Wonder",
+	\path: 			"Wonder",
+	\summary:		"Classes for interacting with sWONDER.",
+	\author: 		"Marije Baalman",
+	\organization:	"nescivi - Amsterdam",
+	\country: 		"The Netherlands",
+	\helpdoc:		"Help/Wonder.html",
+	\since: 		"2010",
+	\version:		"0.1"
+)

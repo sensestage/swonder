@@ -1,0 +1,11 @@
+(
+	\name: 			"SWonder",
+	\path: 			"SWonder",
+	\summary:		"Classes for interacting with sWONDER.",
+	\author: 		"Florian Goltz, Marije Baalman",
+	\organization:	"TU Berlin and nescivi - Amsterdam",
+	\country: 		"Germany and The Netherlands",
+	\helpdoc:		"SWonder.html",
+	\since: 		"2010",
+	\version:		"0.1"
+)

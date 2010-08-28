@@ -1,0 +1,130 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<title></title>
+<meta name="Generator" content="Cocoa HTML Writer">
+<meta name="CocoaVersion" content="1038.32">
+<style type="text/css">
+p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 18.0px Helvetica; min-height: 22.0px}
+p.p3 {margin: 0.0px 0.0px 0.0px 57.0px; text-indent: -57.0px; font: 12.0px Helvetica}
+p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica}
+p.p6 {margin: 0.0px 0.0px 0.0px 57.0px; text-indent: -57.0px; font: 9.0px Monaco; min-height: 12.0px}
+p.p7 {margin: 0.0px 0.0px 0.0px 85.0px; text-indent: -85.0px; font: 12.0px Helvetica}
+p.p8 {margin: 0.0px 0.0px 0.0px 85.0px; text-indent: -85.0px; font: 12.0px Helvetica; min-height: 14.0px}
+p.p9 {margin: 0.0px 0.0px 0.0px 57.0px; text-indent: -57.0px; font: 12.0px Helvetica; min-height: 14.0px}
+p.p10 {margin: 0.0px 0.0px 0.0px 57.0px; text-indent: -57.0px; font: 10.0px Monaco; min-height: 14.0px}
+p.p11 {margin: 0.0px 0.0px 0.0px 57.0px; text-indent: -57.0px; font: 14.0px Helvetica}
+p.p12 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; min-height: 12.0px}
+p.p13 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #e10000}
+p.p14 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco}
+p.p15 {margin: 0.0px 0.0px 0.0px 0.0px; font: 10.0px Monaco}
+span.s1 {font: 18.0px Helvetica}
+span.s2 {font: 10.0px Monaco}
+span.s3 {color: #000000}
+span.s4 {color: #2500cf}
+span.s5 {color: #737373}
+span.s6 {color: #e00000}
+span.s7 {color: #e10000}
+span.Apple-tab-span {white-space:pre}
+</style>
+</head>
+<body>
+<p class="p1"><span class="s1"><b>SWonder<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></b></span><b>Interface to the TU-Berlin WFS-System</b><span class="s1"><b><span class="Apple-tab-span">	</span></b></span></p>
+<p class="p2"><br></p>
+<p class="p3">Class to connect to CWonder and monitor the OSC-Stream.<span class="Apple-converted-space"> </span></p>
+<p class="p3">It uses a normalized coordinate system.<span class="Apple-converted-space"> </span></p>
+<p class="p3">The area inside the room is normaized to an range of -1 to 1.<span class="Apple-converted-space"> </span></p>
+<p class="p3">The GUI allows you to move sources with drag and drop.</p>
+<p class="p3">Right klicking a plane wave source allows you to turn it.</p>
+<p class="p3">Pressing 'a' adds a source.</p>
+<p class="p3">When a source is touched 't' changes it's type, 'a' changes it's angle and 'r' removes it.</p>
+<p class="p4"><br></p>
+<p class="p5"><b>Creation / Class Methods</b></p>
+<p class="p6"><br></p>
+<p class="p3"><b><span class="Apple-tab-span">	</span>*new(cWonder)</b></p>
+<p class="p3"><b><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></b>Creates a new SWonder instance.<span class="Apple-converted-space"> </span></p>
+<p class="p7"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><b>cWonder </b>- NetAddr of cWonder</p>
+<p class="p8"><br></p>
+<p class="p3"><b><span class="Apple-tab-span">	</span>*connect</b></p>
+<p class="p3"><b><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></b>Connect to cWonder.<span class="Apple-converted-space"> </span></p>
+<p class="p8"><br></p>
+<p class="p3"><b><span class="Apple-tab-span">	</span>*disconnect</b></p>
+<p class="p3"><b><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></b>Disconnect from cWonder.<span class="Apple-converted-space"> </span></p>
+<p class="p9"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p3"><span class="Apple-tab-span">	</span><b>*createProject(name)</b></p>
+<p class="p3"><span class="s2"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></span><b>name</b> - String</p>
+<p class="p10"><span class="Apple-tab-span">	</span></p>
+<p class="p3"><span class="s2"><span class="Apple-tab-span">	</span></span><b>*loadProject(name)</b></p>
+<p class="p3"><span class="s2"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></span><b>name</b> - String</p>
+<p class="p10"><span class="Apple-tab-span">	</span></p>
+<p class="p3"><span class="s2"><span class="Apple-tab-span">	</span></span><b>*saveProject</b></p>
+<p class="p8"><br></p>
+<p class="p3"><b><span class="Apple-tab-span">	</span>*drawGUI_(bool)</b></p>
+<p class="p3"><b><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></b>Switch GUI on/off.<span class="Apple-converted-space"> </span></p>
+<p class="p8"><br></p>
+<p class="p3"><b><span class="Apple-tab-span">	</span>*addSource(sourceID, point)</b></p>
+<p class="p7"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><b>sourceID </b>- source id starting at 0</p>
+<p class="p7"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><b>point </b>- coordinates of the source position</p>
+<p class="p8"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p3"><b><span class="Apple-tab-span">	</span>*removeSource(sourceID)</b></p>
+<p class="p7"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><b>sourceID </b>- source id starting at 0</p>
+<p class="p8"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p3"><b><span class="Apple-tab-span">	</span>*sourcePosition(sourceID, point, dur)</b></p>
+<p class="p7"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><b>sourceID </b>- source id starting at 0</p>
+<p class="p7"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><b>point </b>- coordinates of the source position</p>
+<p class="p7"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><b>dur </b>- transition time in seconds</p>
+<p class="p8"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p3"><b><span class="Apple-tab-span">	</span>*sourcePlane(sourceID, plane)</b></p>
+<p class="p7"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><b>sourceID </b>- source id starting at 0</p>
+<p class="p7"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><b>plane </b>- bool</p>
+<p class="p8"><br></p>
+<p class="p3"><b><span class="Apple-tab-span">	</span>*sourceAngle(sourceID, angle)</b></p>
+<p class="p7"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><b>sourceID </b>- source id starting at 0</p>
+<p class="p7"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><b>angle </b>- angle in degrees</p>
+<p class="p8"><br></p>
+<p class="p3"><b><span class="Apple-tab-span">	</span>*sourceColor(sourceID, color)</b></p>
+<p class="p7"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><b>sourceID </b>- source id starting at 0</p>
+<p class="p7"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><b>color </b>- Color</p>
+<p class="p8"><br></p>
+<p class="p3"><b><span class="Apple-tab-span">	</span>*sourceName(sourceID, name)</b></p>
+<p class="p7"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><b>sourceID </b>- source id starting at 0</p>
+<p class="p7"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><b>name </b>- Color</p>
+<p class="p8"><br></p>
+<p class="p3"><b><span class="Apple-tab-span">	</span>*sourceDoppler(sourceID, doppler)</b></p>
+<p class="p7"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><b>sourceID </b>- source id starting at 0</p>
+<p class="p7"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><b>doppler </b>- bool</p>
+<p class="p8"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p3"><b><span class="Apple-tab-span">	</span>*room_(room)</b></p>
+<p class="p7"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><b>room </b>- Array of points describing the room, H104 is default</p>
+<p class="p8"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p3"><b><span class="Apple-tab-span">	</span>*free</b></p>
+<p class="p3"><b><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></b>disconnect and clean up</p>
+<p class="p8"><span class="Apple-tab-span">	</span></p>
+<p class="p8"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p8"><br></p>
+<p class="p11"><b>Example</b></p>
+<p class="p12"><br></p>
+<p class="p13"><span class="s3">a = </span><span class="s4">SWonder</span><span class="s3">( </span><span class="s4">NetAddr</span><span class="s3">(</span><span class="s5">"localhost"</span><span class="s3">, 58100)); </span>// creating an instance of SWonder</p>
+<p class="p13"><span class="s3">a.connect </span>// connect it to cwonder</p>
+<p class="p14">a.drawGUI_(<span class="s4">true</span>)</p>
+<p class="p15">a.room_([ -7.7@0, 7.7@0,<span class="Apple-converted-space">  </span>10@8.8, 10@25.7, -10@25.7, -10@8.8, -7.7@ 0 ]) <span class="s6">// set room to h104 for testing if nt connected</span></p>
+<p class="p13"><span class="s3">a.sourcePosition(0, 0@0, 5) </span>// put source 0 in the center of the room</p>
+<p class="p13"><span class="s3">a.sourcePosition(0, 0@0.5) </span>// move it half way to the front</p>
+<p class="p13"><span class="s3">a.addSource(1, 0.5@0.2) </span>// add a source directlly to a specified position</p>
+<p class="p13"><span class="s3">a.sourcePlane(1, </span><span class="s4">true</span><span class="s3">) </span>// add a plane wave source</p>
+<p class="p14">a.sourceAngle(1, 360.rand) <span class="s7">// set it's angle</span></p>
+<p class="p14">a.sourceName(1, <span class="s5">"new name"</span>) <span class="s7">// rename it</span></p>
+<p class="p14">a.sourceColor(1, <span class="s4">Color</span>.rand) <span class="s7">// different color</span></p>
+<p class="p14">a.removeSource(1) <span class="s7">// remove it</span></p>
+<p class="p14">a.addNextSource</p>
+<p class="p14">a.addNextSource(0.1 @ 0.7)</p>
+<p class="p14">a.free</p>
+<p class="p15">a.room_([ -7.7@0, 7.7@0,<span class="Apple-converted-space">  </span>10@8.8, 10@25.7, -10@25.7, -10@8.8, -7.7@ 0 ])<span class="s3"> </span><span class="s7">// set room to h104</span></p>
+<p class="p12"><br></p>
+<p class="p12"><br></p>
+</body>
+</html>
