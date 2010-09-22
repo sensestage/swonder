@@ -1,8 +1,10 @@
+// Created by Florian Goltz and Marije Baalman
+
 SWonderGUI {
 
 	var <>swonder;
 
-	var <window, winWidth = 460, winHeigth = 460, touchDist = 15, touchedSrc, turnSrc;
+	var <window, winWidth = 460, winHeigth = 460, touchDist = 15, <>touchedSrc, turnSrc;
 	var <>maxOut = 3;
 	var <>angleOffset=180;
 
@@ -36,22 +38,37 @@ SWonderGUI {
 				swonder.scaledRoom.do{ |pt| Pen.lineTo(this.norm2gui(pt)) };
 				Pen.fillStroke;
 				swonder.sources.do{ |src|
-						var pt = this.norm2gui(src.normalisedPosition);
+					var pt = this.norm2gui(src.normalisedPosition);
 					try {
 						Pen.color_(src.color);
-							if (src.plane) {
-								Pen.addWedge(pt, 12, (src.angle+angleOffset-22.5).degrad, pi/4);	
-								} {	
-								Pen.addArc(pt, 4, 0, 2*pi);
-								};
-						
-								Pen.draw;
-							};
-							Pen.color_(Color.black);
-							Pen.stringAtPoint(src.name.asString, pt.x+3 @ pt.y);
-							Pen.draw;	
+						if (src.plane) {
+							Pen.addWedge(pt, 12, (src.angle+angleOffset-22.5).degrad, pi/4);	
+						} {	
+							Pen.addArc(pt, 4, 0, 2*pi);
+						};
+						Pen.draw;
 					};
-				})
+					Pen.color_(Color.black);
+					Pen.stringAtPoint(src.name.asString, pt.x+3 @ pt.y);
+					Pen.draw;	
+				};
+				swonder.groups.do{ |grp|
+					var pt = this.norm2gui(grp.normalisedPosition);
+					try {
+						Pen.color_(grp.color);	
+						Pen.addRect( Rect( pt.x - 3, pt.y -3, 6, 6 ) );
+						Pen.draw;
+						grp.sources.do{ |src|
+							var pt2 = this.norm2gui(src.normalisedPosition);
+							Pen.line( pt, pt2 );
+							Pen.draw;
+						};
+						Pen.color_(Color.black);
+						Pen.stringAtPoint(grp.name.asString, pt.x+3 @ pt.y);
+						Pen.draw;
+					};
+				};
+			})
 			.mouseDownAction_({|me, x, y, mod, button|
 				var closestSrc = this.closestSrc( this.gui2norm( x@y ) );
 				if ( closestSrc.isNil.not ) {

@@ -9,7 +9,7 @@
 ~wonder.gui;
 
 // install from code:
-~wonder.install( "Wonder" )
+~wonder.install( "SWonder" )
 
 
 
